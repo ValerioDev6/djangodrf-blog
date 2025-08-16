@@ -1,0 +1,153 @@
+# ========================================
+# ARCHIVOS SENSIBLES (NUNCA SUBIR)
+# ========================================
+.env
+.env.*
+.env.local
+.env.production
+.env.development
+*.env
+
+# Variables de entorno específicas
+core/.env
+backend/.env
+
+# ========================================
+# BASE DE DATOS (NUNCA SUBIR)
+# ========================================
+*.sqlite3
+*.sqlite3-journal
+*.db
+db.sqlite3
+.dbdata/
+dbdata/
+postgres_data/
+pgadmin_data/
+
+# ========================================
+# PYTHON
+# ========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ========================================
+# DJANGO
+# ========================================
+*.log
+local_settings.py
+media/
+staticfiles/
+static_root/
+.coverage
+htmlcov/
+
+# ========================================
+# VIRTUAL ENVIRONMENTS
+# ========================================
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# ========================================
+# IDEs y EDITORES
+# ========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.sublime-project
+.sublime-workspace
+
+# ========================================
+# SISTEMA OPERATIVO
+# ========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ========================================
+# NODE.JS (si usas frontend)
+# ========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+
+# ========================================
+# DOCKER
+# ========================================
+.dockerignore
+# NO ignores docker-compose.yml ni Dockerfile
+
+# ========================================
+# LOGS
+# ========================================
+*.log
+logs/
+log/
+
+# ========================================
+# CACHE
+# ========================================
+.cache/
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ========================================
+# ARCHIVOS TEMPORALES
+# ========================================
+*.tmp
+*.bak
+*.swp
+*~.nib
+*.orig
+
+# ========================================
+# SSL CERTIFICATES
+# ========================================
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx

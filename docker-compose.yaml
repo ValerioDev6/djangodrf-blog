@@ -1,0 +1,33 @@
+services:
+  # django app
+  backend:
+    container_name: django
+    build: .
+    command: uvicorn core.asgi:application --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    depends_on:
+      - django_redis
+
+  # redis
+  django_redis:
+    image: redis
+    container_name: django_redis
+    ports:
+      - "6379:6379"
+  
+  # database
+  django_db:
+    image: postgres               # Usa la imagen oficial de PostgreSQL
+    container_name: postgresql    # El contenedor se llama "postgresql"
+    restart: always
+    environment:
+      POSTGRES_DB: django_db      # Nombre de la base
+      POSTGRES_USER: django       # Usuario
+      POSTGRES_PASSWORD: postgres # Contraseña
+    ports:
+      - "5433:5432"               # Expone el puerto 5432 del contenedor en el 5433 de tu máquina
+    volumes:
+      - .dbdata:/var/lib/postgresql
