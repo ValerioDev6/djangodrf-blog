@@ -1,5 +1,6 @@
-from apps.blog.models import Heading, Post
+from apps.blog.models import Heading, Post, PostView
 from apps.blog.serializers import HeadingSerializer, PostListSerializer, PostSerializer
+from apps.blog.utils import get_client_ip
 from django.shortcuts import render
 from rest_framework.generics import (
     CreateAPIView,
@@ -34,6 +35,13 @@ class PostDetailView(APIView):
     def get(self, request, slug):
         post = Post.post_objects.get(slug=slug)
         serialized_post = PostSerializer(post).data
+
+        client_ip = get_client_ip(request)
+        if PostView.objects.filter(post=post, ip_address=client_ip).exists():
+            return Response(serialized_post)
+
+        PostView.objects.create(post=post, ip_address=client_ip)
+        
         return Response(serialized_post)
 
 

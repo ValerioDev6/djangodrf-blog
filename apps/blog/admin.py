@@ -34,7 +34,11 @@ class PostAdmin(admin.ModelAdmin):
     search_fields = ("title", "slug")
     list_filter = ("category", "status")
     prepopulated_fields = {"slug": ("title",)}
-    readonly_fields = ("id", "created_at", "updated_at", "views")
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+    )
     ordering = ("-created_at",)
     list_editable = ("status",)
 

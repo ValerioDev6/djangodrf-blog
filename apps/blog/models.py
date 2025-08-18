@@ -1,5 +1,6 @@
 import uuid
 
+from apps.blog.utils import get_client_ip
 from ckeditor.fields import RichTextField
 from django.db import models
 from django.utils import timezone
@@ -61,7 +62,6 @@ class Post(models.Model):
     status = models.CharField(max_length=15, choices=status_options, default="draft")
 
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
-    views = models.IntegerField(default=0)
 
     objects = models.Manager()  # default manager
     post_objects = PostObjects()  # custom manager
@@ -79,6 +79,46 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class PostView(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_view")
+    ip_address = models.GenericIPAddressField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+
+class PostAnalytics(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    post = models.ForeignKey(
+        Post, on_delete=models.CASCADE, related_name="post_analytics"
+    )
+    views = models.PositiveIntegerField(default=0)
+    impressions = models.PositiveIntegerField(default=0)
+    cliks = models.PositiveIntegerField(default=0)
+    clik_through_rate = models.FloatField(default=0)
+    avg_time_on_page = models.FloatField(default=0)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def increment_click(self):
+        self.clicks += 1
+        self.update_click_through_rate()
+
+    def _update_click_through_rate(self):
+        if self.impressions > 0:
+            self.clik_through_rate = (self.clicks / self.impressions) * 100
+
+    def increment_impressions(self):
+        self.impressions += 1
+        self._update_click_through_rate()
+
+    def increment_views(self, request):
+        ip_address = get_client_ip(request)
+
+        if not PostView.objects.filter(post=self.post, ip_address=ip_address).exists():
+            PostView.objects.create(post=self.post, ip_address=ip_address)
+            self.views += 1
+            self.save()
 
 
 class Heading(models.Model):

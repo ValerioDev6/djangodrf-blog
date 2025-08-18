@@ -20,14 +20,27 @@ services:
   
   # database
   django_db:
-    image: postgres               # Usa la imagen oficial de PostgreSQL
-    container_name: postgresql    # El contenedor se llama "postgresql"
+    image: postgres
+    container_name: postgresql
     restart: always
     environment:
-      POSTGRES_DB: django_db      # Nombre de la base
-      POSTGRES_USER: django       # Usuario
-      POSTGRES_PASSWORD: postgres # Contraseña
+      POSTGRES_DB: django_db
+      POSTGRES_USER: django
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "5433:5432"               # Expone el puerto 5432 del contenedor en el 5433 de tu máquina
+      - "5433:5432"
     volumes:
       - .dbdata:/var/lib/postgresql
+
+  # celery
+  celery_worker:
+    container_name: blog_celery_worker
+    build: .
+    command: celery -A core worker --loglevel=info
+    volumes:
+      - .:/app
+    ports:
+      - "8001:8001"
+    depends_on:
+      - django_db
+      - django_redis
