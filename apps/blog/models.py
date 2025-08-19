@@ -3,6 +3,8 @@ import uuid
 from apps.blog.utils import get_client_ip
 from ckeditor.fields import RichTextField
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.text import slugify
 from model_utils.models import SoftDeletableModel
@@ -61,7 +63,7 @@ class Post(models.Model):
     slug = models.CharField(max_length=150)
     status = models.CharField(max_length=15, choices=status_options, default="draft")
 
-    category = models.ForeignKey(Category, on_delete=models.PROTECT)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
 
     objects = models.Manager()  # default manager
     post_objects = PostObjects()  # custom manager
@@ -95,26 +97,32 @@ class PostAnalytics(models.Model):
     )
     views = models.PositiveIntegerField(default=0)
     impressions = models.PositiveIntegerField(default=0)
-    cliks = models.PositiveIntegerField(default=0)
-    clik_through_rate = models.FloatField(default=0)
+    clicks = models.PositiveIntegerField(default=0)
+    click_through_rate = models.FloatField(default=0)
     avg_time_on_page = models.FloatField(default=0)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def increment_click(self):
         self.clicks += 1
-        self.update_click_through_rate()
+        self._update_click_through_rate()
+        self.save()
 
     def _update_click_through_rate(self):
         if self.impressions > 0:
-            self.clik_through_rate = (self.clicks / self.impressions) * 100
+            self.click_through_rate = (self.clicks / self.impressions) * 100
+        else:
+            self.click_through_rate = 0
+        self.save()
 
     def increment_impressions(self):
         self.impressions += 1
         self._update_click_through_rate()
+        self.save()
 
     def increment_views(self, request):
         ip_address = get_client_ip(request)
 
+        # Solo incrementar si es una IP nueva para este post
         if not PostView.objects.filter(post=self.post, ip_address=ip_address).exists():
             PostView.objects.create(post=self.post, ip_address=ip_address)
             self.views += 1
@@ -123,7 +131,7 @@ class PostAnalytics(models.Model):
 
 class Heading(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    post = models.ForeignKey(Post, on_delete=models.PROTECT, related_name="heading")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="heading")
     title = models.CharField(max_length=150)
     slug = models.CharField(max_length=150)
 
@@ -153,3 +161,9 @@ class Heading(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
+
+
+@receiver(post_save, sender=Post)
+def create_post_analytics(sender, instance, created, **kwargs):
+    if created:
+        PostAnalytics.objects.create(post=instance)

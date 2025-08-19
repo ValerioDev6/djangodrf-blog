@@ -1,4 +1,4 @@
-from apps.blog.models import Category, Heading, Post
+from apps.blog.models import Category, Heading, Post, PostAnalytics
 from django import forms
 from django.contrib import admin
 
@@ -82,3 +82,26 @@ class HeadingAdmin(admin.ModelAdmin):
 
 
 # serial keygen: NAVJ-JE47-EQWB-PT2V
+@admin.register(PostAnalytics)
+class PostAnalyticsAdmin(admin.ModelAdmin):
+    list_display = (
+        "post_title",
+        "views",
+        "impressions",
+        "clicks",
+        "click_through_rate",
+        "avg_time_on_page",
+    )
+    search_fields = ("post__title",)
+    readonly_fields = (
+        "views",
+        "impressions",
+        "clicks",  # Corregido
+        "click_through_rate",  # Corregido
+        "avg_time_on_page",
+    )
+
+    def post_title(self, obj):
+        return obj.post.title
+
+    post_title.short_description = "Post Title"

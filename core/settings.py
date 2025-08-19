@@ -17,6 +17,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
+VALID_API_KEYS = env.str("VALID_API_KEYS").split(",")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", True)
 
@@ -43,6 +44,9 @@ THIRD_PARTY_APPS = [
     "channels",
     "ckeditor",
     "ckeditor_uploader",
+    "django_celery_results",
+    "django_celery_beat",
+    "rest_framework_api",
 ]
 
 
@@ -154,6 +158,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 10,
 }
+MAX_PAGE_SIZE = 10
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.cache.RedisChannelLayer",
@@ -161,10 +167,13 @@ CHANNEL_LAYERS = {
     }
 }
 
+
+REDIS_HOST = env("REDIS_HOST")
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://django_redis:6379",
+        "LOCATION": env("REDIS_URL"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
@@ -173,3 +182,24 @@ CACHES = {
 
 
 CHANNELLS_ALLOWED_ORIGINS = ["*"]
+
+
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "America/Lima"
+CELERY_ENABLE_UTC = True
+
+CELERY_BROKER_URL = env("REDIS_URL")
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    "visibility_timeout": 3600,
+    "socket_timeout": 5,
+    "retry_on_timeout": True,
+}
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_CACHE_BACKEND = "default"
+CELERY_IMPORTS = ("core.tasks", "apps.blog.tasks")
+
+
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+CELERY_BEAT_SCHEDULE = {}

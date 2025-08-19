@@ -10,6 +10,7 @@ services:
       - 8000:8000
     depends_on:
       - django_redis
+      - django_db
 
   # redis
   django_redis:
@@ -41,6 +42,20 @@ services:
       - .:/app
     ports:
       - "8001:8001"
+    depends_on:
+      - django_db
+      - django_redis
+
+
+  # celery beat
+  celery_beat:
+    container_name: blog_celery_beat
+    build: .
+    command: celery -A core beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler --loglevel=info
+    volumes:
+      - .:/app
+    ports:
+      - "8002:8002"
     depends_on:
       - django_db
       - django_redis
